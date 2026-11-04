@@ -1,56 +1,127 @@
-# Welcome to your Expo app 👋
+# Phase
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A private period tracker for one person and, optionally, one partner. Phase predicts the next period from logged history, shows the likely cycle phase, and keeps both partners' phones in sync in real time.
 
-## Get started
+Built with React Native and Expo for Android and iOS.
 
-1. Install dependencies
+## Features
 
-   ```bash
-   npm install
-   ```
+- **Home:** next expected period with a likely window, or the current period day; the estimated cycle phase; this month's calendar; average cycle and period length; the previous period.
+- **Calendar:** browse any month and year, with phase icons, logged and expected periods, and the fertile window. Tap a past day to log a period or edit one.
+- **Previous periods:** every logged period with its length, cycle length and who logged it.
+- **Partner sharing:** connect with one partner using a single-use invite code. Changes appear on both phones immediately.
+- **Privacy controls:** the person whose cycle is tracked can disconnect their partner or delete all data at any time.
 
-2. Start the app
+## How predictions work
 
-   ```bash
-   npx expo start
-   ```
+- The next period is the latest start date plus the average of the last six cycle lengths. Gaps that look like a missed log (far longer than usual) are ignored.
+- The likely window is the prediction plus or minus the typical variation between cycles (2 to 7 days).
+- Phases use the calendar method: ovulation is estimated 14 days before the next period, and the fertile window is the 5 days before ovulation plus the day after.
 
-In the output, you'll find options to open the app in a
+Predictions and phases are estimates. They are not medical advice and must not be used as contraception.
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+## Tech stack
 
-You can start developing by editing the files inside the **src/app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+| Area | Choice |
+| --- | --- |
+| App | React Native, Expo SDK 58, Expo Router, TypeScript |
+| Backend | Supabase (Postgres, Auth, Realtime) |
+| UI | Jost (Google Fonts), Lucide icons |
+| Tests | Jest (`jest-expo`), React Native Testing Library, PGlite for database tests |
+| Builds | EAS Build and EAS Submit (no Mac needed for iOS) |
 
-## Get a fresh project
+## Getting started
 
-When you're ready, run:
+### Prerequisites
+
+- Node.js (LTS)
+- A free [Supabase](https://supabase.com) project
+- The **Expo Go** app on your phone, or the Android emulator from Android Studio
+
+### 1. Install
 
 ```bash
-npm run reset-project
+git clone https://github.com/sambhavp96/phase.git
+cd phase
+npm install
 ```
 
-This command will move the starter code to the **example** directory and create a blank **src/app** directory where you can start developing.
+### 2. Set up the database
 
-### Other setup steps
+1. In Supabase, open **SQL Editor** and run [`supabase/schema.sql`](supabase/schema.sql). It is safe to run again; it never deletes current data.
+2. For local development, go to **Authentication → Sign In / Providers → Email** and turn off **Confirm email** so test accounts work without email links. Turn it back on (with a custom SMTP provider) before release.
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+### 3. Add your keys
 
-## Learn more
+Create `.env.local` in the project root (it is git-ignored):
 
-To learn more about developing your project with Expo, look at the following resources:
+```
+EXPO_PUBLIC_SUPABASE_URL=https://YOUR-PROJECT-ID.supabase.co
+EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
+```
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+Both values are under **Connect** (or **Project Settings → API keys**) in Supabase.
 
-## Join the community
+### 4. Run
 
-Join our community of developers creating universal apps.
+```bash
+npx expo start
+```
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+Scan the QR code with Expo Go (Android) or the Camera app (iOS). If your phone is on a different network, use `npx expo start --tunnel`.
+
+To test syncing on one phone: create an account on your phone, then a second account on the Android emulator, and join with the invite code.
+
+## Testing
+
+Run everything before every release:
+
+```bash
+npm run check
+```
+
+This runs, in order, and stops at the first failure:
+
+| Command | What it checks |
+| --- | --- |
+| `npm run typecheck` | TypeScript across the project |
+| `npm test` | Date maths, predictions, phase placement, calendar grid, UI components |
+| `npm run test:db` | Database security rules from `schema.sql`, against an in-memory Postgres |
+
+## Project structure
+
+```
+src/
+  app/            Screens (Expo Router: each file is a route)
+    index.tsx       Home
+    calendar.tsx    Month and year browser with phases
+    history.tsx     Previous periods
+    log.tsx         Log or edit a period
+    menu.tsx        Menu
+    settings.tsx    Partner and sharing
+    onboarding.tsx  Start tracking or join a partner
+    sign-in.tsx     Sign in and sign up
+  components/     Shared UI (text styles, buttons, month grid, phase icons)
+  constants/      Colours, fonts, spacing
+  lib/            Dates, predictions, phases, Supabase client, data provider
+supabase/
+  schema.sql      Tables, row-level security and server functions
+  tests/          Database security tests
+```
+
+## Security model
+
+- Anyone can create an account. A **couple** holds one tracked person's data and at most one partner.
+- Partners connect with an 8-character, single-use invite code that expires after 7 days.
+- Postgres row-level security makes every couple's data invisible to all other accounts. Membership changes only go through server functions (create, join, new code, remove partner, leave).
+- If the tracked person leaves or deletes their account, their cycle data is deleted. If the partner leaves, the data stays with the tracked person.
+
+## Roadmap before the first store release
+
+- [ ] Password reset
+- [ ] In-app account deletion
+- [ ] Forced-update check and over-the-air updates (EAS Update)
+- [ ] Privacy policy
+- [ ] Production Supabase setup (custom SMTP, email confirmation)
+- [ ] App icon, splash screen and store assets
+- [ ] TestFlight and Google Play closed testing
