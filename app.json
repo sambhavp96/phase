@@ -1,23 +1,24 @@
 {
   "expo": {
     "name": "Phase",
-    "slug": "period-tracker",
+    "slug": "phase",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "periodtracker",
+    "scheme": "phase",
     "userInterfaceStyle": "light",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "bundleIdentifier": "xyz.sanaandshav.phase"
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#CEB0B2",
+        "backgroundColor": "#4F2426",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "xyz.sanaandshav.phase"
     },
     "web": {
       "output": "server",
@@ -28,9 +29,9 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#CEB0B2",
+          "backgroundColor": "#4F2426",
           "image": "./assets/images/splash-icon.png",
-          "imageWidth": 76
+          "imageWidth": 160
         }
       ],
       "expo-sqlite",
