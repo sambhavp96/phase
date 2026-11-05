@@ -1,8 +1,11 @@
+import { router } from 'expo-router';
+import * as WebBrowser from 'expo-web-browser';
 import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button, Screen, T } from '@/components/ui';
+import { PRIVACY_URL } from '@/constants/links';
 import { colors, fonts, GUTTER } from '@/constants/theme';
 import { supabase } from '@/lib/supabase';
 
@@ -90,6 +93,25 @@ export default function SignIn() {
           {error && <T style={styles.message}>{error}</T>}
           {notice && <T style={styles.message}>{notice}</T>}
 
+          {signingUp ? (
+            <T v="small" style={styles.message}>
+              By creating an account you agree to the{' '}
+              <T v="small" style={styles.inlineLink} onPress={() => WebBrowser.openBrowserAsync(PRIVACY_URL)}>
+                privacy policy
+              </T>
+              .
+            </T>
+          ) : (
+            <Pressable
+              accessibilityRole="link"
+              onPress={() => router.push({ pathname: '/forgot-password', params: { email: email.trim() } })}
+              style={styles.forgot}>
+              <T v="small" style={styles.inlineLink}>
+                Forgot password?
+              </T>
+            </Pressable>
+          )}
+
           <Button
             title={signingUp ? 'Create account' : 'Sign in'}
             onPress={submit}
@@ -139,6 +161,8 @@ const styles = StyleSheet.create({
   fieldLast: { borderBottomWidth: 1 },
   input: { fontFamily: fonts.regular, fontSize: 18, color: colors.oxblood, paddingVertical: 10, minHeight: 44 },
   message: { marginTop: 14 },
+  inlineLink: { textDecorationLine: 'underline', fontFamily: fonts.medium },
+  forgot: { alignSelf: 'flex-start', minHeight: 44, justifyContent: 'center', marginTop: 4 },
   submit: { marginTop: 24 },
   switch: { minHeight: 48, alignItems: 'center', justifyContent: 'center', marginTop: 8 },
 });

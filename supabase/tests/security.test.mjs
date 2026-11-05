@@ -119,15 +119,28 @@ await as(U.B, `insert into public.periods (start_date) values ('2026-10-01')`);
 await as(U.B, `select public.leave_couple()`);
 ok((await db.query(`select count(*)::int n from public.couples where invite_code = $1`, [codeB])).rows[0].n === 0, 'empty couple cleaned up');
 
-// account deletion: partner E deletes account -> A keeps all data, including rows E logged
+// account deletion through the app's delete_my_account()
+ok(!!(await as(null, `select public.delete_my_account()`)).error, 'signed-out caller cannot delete accounts');
 await as(U.E, `insert into public.periods (start_date) values ('2026-11-01')`);
-await db.exec(`reset role; delete from auth.users where id = '${U.E}'`);
+ok(!(await as(U.E, `select public.delete_my_account()`)).error, 'partner E deletes own account');
+await db.exec(`reset role`);
+ok((await db.query(`select count(*)::int n from auth.users where id = $1`, [U.E])).rows[0].n === 0, 'auth user is gone');
+ok((await db.query(`select count(*)::int n from auth.users`)).rows[0].n === 5, 'no other account touched');
 ok((await as(U.A, `select * from public.periods`)).rows.length === 3, 'partner deleting account keeps tracked data');
 ok((await as(U.A, `select * from public.periods where created_by is null`)).rows.length === 1, 'their rows kept with created_by null');
-// tracked A deletes account -> couple and data gone
-await db.exec(`reset role; delete from auth.users where id = '${U.A}'`);
+ok(!(await as(U.A, `select public.delete_my_account()`)).error, 'tracked A deletes own account');
+await db.exec(`reset role`);
 ok((await db.query(`select count(*)::int n from public.periods where couple_id = '${coupleAB}'`)).rows[0].n === 0, 'tracked deleting account deletes data');
 ok((await db.query(`select count(*)::int n from public.couples`)).rows[0].n === 0, 'no orphan couples');
+ok((await db.query(`select count(*)::int n from public.profiles where id = $1`, [U.A])).rows[0].n === 0, 'profile deleted');
+
+// minimum app versions: readable by everyone, writable by no app user
+ok((await as(null, `select platform, min_version from public.app_versions order by platform`)).rows.length === 2, 'signed-out app can read min versions');
+ok((await as(U.B, `select * from public.app_versions`)).rows.length === 2, 'signed-in app can read min versions');
+ok(!!(await as(U.B, `update public.app_versions set min_version = '0.1.0'`)).error, 'users cannot change min versions');
+ok(!!(await as(null, `insert into public.app_versions (platform) values ('web')`)).error, 'anon cannot add platforms');
+await db.exec(`reset role`);
+ok(!!(await db.query(`update public.app_versions set min_version = 'latest' where platform = 'ios'`).catch((e) => e)).message, 'min_version must look like a version');
 
 await db.close();
 for (const [cond, msg] of results) await t.test(msg, () => assert.ok(cond, msg));

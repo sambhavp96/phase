@@ -50,6 +50,26 @@ npm install
 
 1. In Supabase, open **SQL Editor** and run [`supabase/schema.sql`](supabase/schema.sql). It is safe to run again; it never deletes current data.
 2. For local development, go to **Authentication → Sign In / Providers → Email** and turn off **Confirm email** so test accounts work without email links. Turn it back on (with a custom SMTP provider) before release.
+3. Password reset uses a one-time code instead of a link. In **Authentication → Emails → Reset password**, make the message show the code:
+
+   ```html
+   <h2>Reset your Phase password</h2>
+   <p>Enter this code in the app:</p>
+   <p style="font-size:28px;letter-spacing:4px"><strong>{{ .Token }}</strong></p>
+   <p>If you didn't ask for this, you can ignore this email.</p>
+   ```
+
+### Forcing an update
+
+The app checks `public.app_versions` on launch and whenever it returns to the foreground. If the installed version (from `app.json`) is lower than `min_version` for its platform, only an "Update required" screen is shown. To force everyone onto a new release, in the SQL Editor:
+
+```sql
+update public.app_versions set min_version = '1.1.0' where platform in ('ios', 'android');
+update public.app_versions set store_url = 'https://apps.apple.com/app/idYOUR_APP_ID' where platform = 'ios';
+update public.app_versions set store_url = 'https://play.google.com/store/apps/details?id=YOUR.PACKAGE' where platform = 'android';
+```
+
+If the check can't run (no connection), the app is never blocked.
 
 ### 3. Add your keys
 
@@ -101,6 +121,8 @@ src/
     settings.tsx    Partner and sharing
     onboarding.tsx  Start tracking or join a partner
     sign-in.tsx     Sign in and sign up
+    forgot-password.tsx  Reset a password with an emailed code
+    update-required.tsx  Shown when the installed version is too old
   components/     Shared UI (text styles, buttons, month grid, phase icons)
   constants/      Colours, fonts, spacing
   lib/            Dates, predictions, phases, Supabase client, data provider
@@ -115,13 +137,17 @@ supabase/
 - Partners connect with an 8-character, single-use invite code that expires after 7 days.
 - Postgres row-level security makes every couple's data invisible to all other accounts. Membership changes only go through server functions (create, join, new code, remove partner, leave).
 - If the tracked person leaves or deletes their account, their cycle data is deleted. If the partner leaves, the data stays with the tracked person.
+- Accounts can be deleted in the app (Menu → Delete account), which removes the sign-in and everything attached to it.
+
+See [PRIVACY.md](PRIVACY.md) for the privacy policy.
 
 ## Roadmap before the first store release
 
-- [ ] Password reset
-- [ ] In-app account deletion
-- [ ] Forced-update check and over-the-air updates (EAS Update)
-- [ ] Privacy policy
+- [x] Password reset
+- [x] In-app account deletion
+- [x] Forced-update check
+- [ ] Over-the-air updates (EAS Update, set up with the first EAS build)
+- [x] Privacy policy (fill in contact email and data region)
 - [ ] Production Supabase setup (custom SMTP, email confirmation)
 - [ ] App icon, splash screen and store assets
 - [ ] TestFlight and Google Play closed testing

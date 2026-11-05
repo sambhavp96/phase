@@ -339,6 +339,50 @@ grant execute on function public.create_couple(boolean), public.join_couple(text
   to authenticated;
 
 ---------------------------------------------------------------------------
+-- Account deletion (required by the App Store).
+-- Deleting the auth user cascades through the tables above:
+--   tracked person -> their couple and all cycle data are deleted;
+--   partner        -> they leave, the data stays with the tracked person.
+---------------------------------------------------------------------------
+create or replace function public.delete_my_account()
+returns void
+language plpgsql security definer set search_path = ''
+as $$
+begin
+  if auth.uid() is null then
+    raise exception 'Not signed in';
+  end if;
+  delete from auth.users where id = auth.uid();
+end;
+$$;
+
+revoke execute on function public.delete_my_account() from public, anon;
+grant execute on function public.delete_my_account() to authenticated;
+
+---------------------------------------------------------------------------
+-- Forced updates: the app refuses to run below min_version for its platform.
+-- To force everyone onto a new release:
+--   update public.app_versions set min_version = '1.2.0' where platform = 'ios';
+---------------------------------------------------------------------------
+create table if not exists public.app_versions (
+  platform text primary key check (platform in ('ios', 'android')),
+  min_version text not null default '1.0.0' check (min_version ~ '^\d+(\.\d+){0,2}$'),
+  store_url text
+);
+
+insert into public.app_versions (platform) values ('ios'), ('android')
+on conflict (platform) do nothing;
+
+alter table public.app_versions enable row level security;
+
+drop policy if exists "anyone reads app versions" on public.app_versions;
+create policy "anyone reads app versions" on public.app_versions
+  for select to anon, authenticated using (true);
+
+grant select on public.app_versions to anon, authenticated;
+revoke insert, update, delete on public.app_versions from anon, authenticated;
+
+---------------------------------------------------------------------------
 -- Live updates between the two phones.
 ---------------------------------------------------------------------------
 do $$

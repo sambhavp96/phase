@@ -3,6 +3,7 @@ import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleShee
 
 import { Button, Screen, T } from '@/components/ui';
 import { colors, fonts, GUTTER } from '@/constants/theme';
+import { confirmDeleteAccount } from '@/lib/account';
 import { useData } from '@/lib/periods';
 import { supabase } from '@/lib/supabase';
 
@@ -85,11 +86,18 @@ export default function Onboarding() {
             Only you and the one partner you connect with can see this data. The person whose cycle is tracked can
             disconnect the partner or delete everything at any time.
           </T>
-          <Pressable accessibilityRole="button" onPress={() => supabase.auth.signOut()} style={styles.signOut}>
-            <T v="label" style={{ fontFamily: fonts.semibold }}>
-              Sign out
-            </T>
-          </Pressable>
+          <View style={styles.footer}>
+            <Pressable accessibilityRole="button" onPress={() => supabase.auth.signOut()} style={styles.signOut}>
+              <T v="label" style={{ fontFamily: fonts.semibold }}>
+                Sign out
+              </T>
+            </Pressable>
+            <Pressable accessibilityRole="button" onPress={() => confirmDeleteAccount(null)} style={styles.signOut}>
+              <T v="label" style={{ fontFamily: fonts.semibold }}>
+                Delete account
+              </T>
+            </Pressable>
+          </View>
         </ScrollView>
       </KeyboardAvoidingView>
     </Screen>
@@ -115,5 +123,6 @@ const styles = StyleSheet.create({
     color: colors.oxblood,
   },
   privacy: { marginTop: 28 },
-  signOut: { minHeight: 48, alignItems: 'center', justifyContent: 'center', marginTop: 12 },
+  footer: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 12 },
+  signOut: { minHeight: 48, justifyContent: 'center' },
 });
