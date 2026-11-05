@@ -50,7 +50,18 @@ npm install
 
 1. In Supabase, open **SQL Editor** and run [`supabase/schema.sql`](supabase/schema.sql). It is safe to run again; it never deletes current data.
 2. For local development, go to **Authentication → Sign In / Providers → Email** and turn off **Confirm email** so test accounts work without email links. Turn it back on (with a custom SMTP provider) before release.
-3. Password reset uses a one-time code instead of a link. In **Authentication → Emails → Reset password**, make the message show the code:
+3. Sign-up confirmation and password reset use one-time codes instead of links. In **Authentication → Emails**, make both templates show the code:
+
+   **Confirm signup**
+
+   ```html
+   <h2>Welcome to Phase</h2>
+   <p>Enter this code in the app to confirm your email:</p>
+   <p style="font-size:28px;letter-spacing:4px"><strong>{{ .Token }}</strong></p>
+   <p>If you didn't create an account, you can ignore this email.</p>
+   ```
+
+   **Reset password**
 
    ```html
    <h2>Reset your Phase password</h2>
@@ -58,6 +69,12 @@ npm install
    <p style="font-size:28px;letter-spacing:4px"><strong>{{ .Token }}</strong></p>
    <p>If you didn't ask for this, you can ignore this email.</p>
    ```
+
+### Going live
+
+- **Email sender (required):** Supabase's built-in email only reaches members of your Supabase team and sends 2 per hour, so real users never get their codes. Add a provider in **Authentication → Emails → SMTP Settings** (Resend, Brevo, Postmark and others work), then turn on **Confirm email**.
+- **Password length:** in **Authentication → Sign In / Providers**, set the minimum password length to 8 so the server enforces what the app asks for.
+- **Staying awake:** free projects pause after about a week without activity. [`.github/workflows/keep-supabase-awake.yml`](.github/workflows/keep-supabase-awake.yml) reads the database every 3 days. Add the `SUPABASE_URL` and `SUPABASE_PUBLISHABLE_KEY` repository secrets for it to work. GitHub turns off scheduled workflows in repositories with no commits for 60 days, so re-enable it in the Actions tab if that happens.
 
 ### Forcing an update
 
@@ -148,6 +165,6 @@ See [PRIVACY.md](PRIVACY.md) for the privacy policy.
 - [x] Forced-update check
 - [ ] Over-the-air updates (EAS Update, set up with the first EAS build)
 - [x] Privacy policy (fill in contact email and data region)
-- [ ] Production Supabase setup (custom SMTP, email confirmation)
+- [ ] Production Supabase setup: email sender (SMTP), confirmation on, keep-awake secrets
 - [ ] App icon, splash screen and store assets
 - [ ] TestFlight and Google Play closed testing

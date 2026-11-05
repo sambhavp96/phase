@@ -1,7 +1,8 @@
 import { useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
+import { Field } from '@/components/field';
 import { Button, Screen, T } from '@/components/ui';
 import { colors, fonts, GUTTER } from '@/constants/theme';
 import { supabase } from '@/lib/supabase';
@@ -126,29 +127,12 @@ export default function ForgotPassword() {
   );
 }
 
-function Field({
-  label,
-  first,
-  last,
-  ...input
-}: React.ComponentProps<typeof TextInput> & { label: string; first?: boolean; last?: boolean }) {
-  return (
-    <View style={[styles.field, first && styles.fieldFirst, last && styles.fieldLast]}>
-      <T v="label">{label}</T>
-      <TextInput {...input} accessibilityLabel={label} style={styles.input} selectionColor={colors.oxblood} />
-    </View>
-  );
-}
 
 const styles = StyleSheet.create({
   flex: { flex: 1 },
   content: { paddingHorizontal: GUTTER, paddingBottom: 40 },
   title: { marginTop: 4, marginBottom: 8 },
   fields: { marginTop: 28 },
-  field: { borderTopWidth: 1, borderColor: colors.oxblood, paddingTop: 10 },
-  fieldFirst: { borderTopWidth: 0, paddingTop: 0 },
-  fieldLast: { borderBottomWidth: 1 },
-  input: { fontFamily: fonts.regular, fontSize: 18, color: colors.oxblood, paddingVertical: 10, minHeight: 44 },
   message: { marginTop: 14 },
   submit: { marginTop: 24 },
   link: { minHeight: 48, alignItems: 'center', justifyContent: 'center', marginTop: 8 },

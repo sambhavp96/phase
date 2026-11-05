@@ -2,7 +2,7 @@
 
 **Effective date:** 4 November 2026
 
-Phase is a period tracker for one person and, if they choose, one partner. This policy explains what the app stores, who can see it, and how to delete it. Questions: **[CONTACT EMAIL]**.
+Phase is a period tracker for one person and, if they choose, one partner. This policy explains what the app stores, who can see it, and how to delete it. Questions: sambhavpokharel@gmail.com.
 
 ## The short version
 
@@ -29,7 +29,7 @@ Predictions and phases are calculated from the dates you log. They are estimates
 
 - **You.**
 - **Your partner**, only if you connect with them using an invite code. A connected partner can see and add to the cycle history. The person whose cycle is tracked can disconnect the partner at any time, and they lose access immediately.
-- **Our database provider, Supabase**, which stores the data on our behalf and processes it only to run the service. Data is encrypted in transit (HTTPS) and at rest. It is hosted in **[SUPABASE REGION, e.g. United States (East)]**.
+- **Our database provider, Supabase**, which stores the data on our behalf and processes it only to run the service. Data is encrypted in transit (HTTPS) and at rest. It is hosted in us-east-1.
 
 Nobody else can see your data. Database rules enforce this on the server: every couple's data is invisible to every other account.
 
@@ -47,7 +47,7 @@ Deleted data may remain in our provider's encrypted backups for a short period b
 
 ## Your rights
 
-Depending on where you live, you may have the right to access, correct, export or delete your data, and to object to how it is used. Most of this you can do in the app. For anything else, email **[CONTACT EMAIL]**.
+Depending on where you live, you may have the right to access, correct, export or delete your data, and to object to how it is used. Most of this you can do in the app. For anything else, email sambhavpokharel@gmail.com.
 
 ## Children
 

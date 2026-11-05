@@ -1,9 +1,10 @@
 import { router } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 import { useState } from 'react';
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { Field } from '@/components/field';
 import { Button, Screen, T } from '@/components/ui';
 import { PRIVACY_URL } from '@/constants/links';
 import { colors, fonts, GUTTER } from '@/constants/theme';
@@ -34,13 +35,18 @@ export default function SignIn() {
       });
       if (err) setError(err.message);
       else if (!data.session) {
-        // Email confirmation is switched on in Supabase.
-        setNotice('Check your email and tap the confirmation link, then sign in here.');
+        // Email confirmation is on: the account exists but needs the emailed code.
         setMode('signIn');
+        router.push({ pathname: '/verify-email', params: { email: email.trim() } });
       }
     } else {
       const { error: err } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
-      if (err) setError(err.message);
+      if (err?.code === 'email_not_confirmed') {
+        setNotice('This email isn’t confirmed yet. Enter the code from your sign-up email, or send a new one.');
+        router.push({ pathname: '/verify-email', params: { email: email.trim() } });
+      } else if (err) {
+        setError(err.message);
+      }
     }
     setBusy(false);
   }
@@ -136,19 +142,6 @@ export default function SignIn() {
   );
 }
 
-function Field({
-  label,
-  first,
-  last,
-  ...input
-}: React.ComponentProps<typeof TextInput> & { label: string; first?: boolean; last?: boolean }) {
-  return (
-    <View style={[styles.field, first && styles.fieldFirst, last && styles.fieldLast]}>
-      <T v="label">{label}</T>
-      <TextInput {...input} accessibilityLabel={label} style={styles.input} selectionColor={colors.oxblood} />
-    </View>
-  );
-}
 
 const styles = StyleSheet.create({
   flex: { flex: 1 },
@@ -156,10 +149,6 @@ const styles = StyleSheet.create({
   headline: { marginTop: 4 },
   intro: { marginTop: 4 },
   fields: { marginTop: 36 },
-  field: { borderTopWidth: 1, borderColor: colors.oxblood, paddingTop: 10 },
-  fieldFirst: { borderTopWidth: 0, paddingTop: 0 },
-  fieldLast: { borderBottomWidth: 1 },
-  input: { fontFamily: fonts.regular, fontSize: 18, color: colors.oxblood, paddingVertical: 10, minHeight: 44 },
   message: { marginTop: 14 },
   inlineLink: { textDecorationLine: 'underline', fontFamily: fonts.medium },
   forgot: { alignSelf: 'flex-start', minHeight: 44, justifyContent: 'center', marginTop: 4 },

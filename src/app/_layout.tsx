@@ -73,6 +73,7 @@ function RootNavigator() {
         <Stack.Protected guard={open && !loaded}>
           <Stack.Screen name="sign-in" options={{ headerShown: false }} />
           <Stack.Screen name="forgot-password" options={{ title: '' }} />
+          <Stack.Screen name="verify-email" options={{ title: '' }} />
         </Stack.Protected>
         <Stack.Protected guard={updateRequired}>
           <Stack.Screen name="update-required" options={{ headerShown: false, gestureEnabled: false }} />
