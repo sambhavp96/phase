@@ -59,7 +59,7 @@ export default function Home() {
           : p.daysUntil === 0
             ? 'Today.'
             : `${plural(-p.daysUntil, 'day')} later than expected.`;
-    sub = `Likely between ${formatRange(p.windowStart!, p.windowEnd!)}. ${when}`;
+    sub = `Likely ${formatRange(p.windowStart!, p.windowEnd!)}. ${when}`;
     if (p.cyclesUsed === 0) sub += ' Using a typical 28-day cycle until a second period is logged.';
   }
 

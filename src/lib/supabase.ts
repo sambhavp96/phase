@@ -14,9 +14,13 @@ if (!url || !key) {
   );
 }
 
+// The phone gets localStorage from expo-sqlite above. Build tools that load this file in Node
+// have none, so don't touch it there (sessions just aren't saved, which is fine for a build).
+const storage = typeof localStorage === 'undefined' ? undefined : localStorage;
+
 export const supabase = createClient(url, key, {
   auth: {
-    storage: localStorage,
+    storage,
     autoRefreshToken: true,
     persistSession: true,
     detectSessionInUrl: false,

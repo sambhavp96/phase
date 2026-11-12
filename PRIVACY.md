@@ -43,6 +43,8 @@ We keep your data until you delete it. You can:
 - **Delete all cycle data** (if it is your cycle) from Menu → Partner and sharing.
 - **Delete your account** from Menu → Delete account. This removes your account immediately. If the cycle is yours, your whole history is deleted and your partner is disconnected. If you are the partner, your account is removed and the history stays with the person whose cycle it is.
 
+If you no longer have the app, you can ask us to delete your account by email: see [how to delete your account](DELETE-ACCOUNT.md).
+
 Deleted data may remain in our provider's encrypted backups for a short period before it is overwritten.
 
 ## Your rights
